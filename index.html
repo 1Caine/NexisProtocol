@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexis — From Spark to Ship</title>
+<style>
+body {margin:0;font-family:Arial,sans-serif;background:#111;color:#eee;line-height:1.6;}
+header{text-align:center;padding:60px 20px;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;}
+header h1{font-size:2.5rem;margin-bottom:10px;}
+header p{font-size:1.2rem;margin-bottom:20px;}
+header a{display:inline-block;padding:12px 24px;background:#00e6b8;color:#111;text-decoration:none;border-radius:6px;font-weight:bold;}
+section{max-width:1000px;margin:60px auto;padding:0 20px;}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+.card{background:#1c1c1c;padding:20px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
+.card h3{margin-top:0;color:#00e6b8;}
+.faq-item{margin-bottom:20px;}
+.faq-item h4{cursor:pointer;margin:0;padding:10px;background:#222;border-radius:6px;}
+.faq-item p{display:none;padding:10px;background:#333;border-radius:6px;}
+footer{text-align:center;padding:20px;background:#111;font-size:.9rem;color:#777;}
+form{background:#1c1c1c;padding:20px;border-radius:10px;}
+form label{display:block;margin:12px 0 6px;font-weight:bold;}
+form input,form textarea{width:100%;padding:10px;border:none;border-radius:6px;background:#222;color:#eee;}
+form button{margin-top:20px;padding:12px 24px;border:none;border-radius:6px;background:#00e6b8;color:#111;font-weight:bold;cursor:pointer;}
+#snapshot{margin-top:30px;padding:20px;border-radius:10px;background:#222;display:none;}
+#snapshot h3{color:#00e6b8;margin-top:0;}
+</style>
+</head>
+<body>
+<header>
+<h1>Build Faster. Ship Smarter.</h1>
+<p>Nexis is your builder’s copilot—from idea to launch. Tokenomics, growth, and content that actually moves the needle.</p>
+<a href="#start">Start with your idea →</a>
+</header>
+
+<section>
+<h2>How it Works</h2>
+<div class="features">
+<div class="card"><h3>Scope</h3><p>Clarify your problem, audience, and goals with an executive snapshot and 2-week plan.</p></div>
+<div class="card"><h3>Tokenomics</h3><p>Stress-tested allocations, vesting, and emissions that balance growth and sustainability.</p></div>
+<div class="card"><h3>GTM & Content</h3><p>90-day playbooks, KPI trees, content calendars, and assets that connect with your audience.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Safety First</h2>
+<p>Nexis highlights risks, avoids hype, and refuses manipulative tactics. We provide non-legal educational checklists, helping you stay clear of common traps.</p>
+</section>
+
+<section id="start">
+<h2>Start with Your Idea</h2>
+<form id="nexisForm">
+<label for="idea">Your Idea / Project</label>
+<textarea name="idea" id="idea" rows="3" required></textarea>
+<label for="audience">Audience</label>
+<input type="text" name="audience" id="audience" placeholder="e.g. creators, traders, DAOs">
+<label for="budget">Budget (optional)</label>
+<input type="text" name="budget" id="budget" placeholder="e.g. $10k">
+<label for="timeline">Timeline (optional)</label>
+<input type="text" name="timeline" id="timeline" placeholder="e.g. 3 months">
+<label for="goal">Goal for Next 30 Days</label>
+<input type="text" name="goal" id="goal" placeholder="e.g. launch MVP, recruit community">
+<button type="submit">Run Nexis</button>
+</form>
+
+<div id="output" style="display:none; margin-top:30px;">
+<h3>Executive Snapshot</h3>
+<div id="snapshot" class="card"></div>
+<h3>Next 3 Actions</h3>
+<ul id="actions"></ul>
+<h3>Open Questions</h3>
+<ul id="questions"></ul>
+</div>
+</section>
+
+<section>
+<h2>FAQ</h2>
+<div class="faq-item"><h4>How does Nexis decide allocations?</h4><p>Based on industry benchmarks, assumptions, and stress tests. All assumptions are transparent.</p></div>
+<div class="faq-item"><h4>Do you offer legal advice?</h4><p>No. Nexis only provides educational guidance and encourages professional counsel.</p></div>
+<div class="faq-item"><h4>Can I export plans?</h4><p>Yes. Plans are exportable as Markdown or CSV for easy sharing.</p></div>
+</section>
+
+<footer><p>© 2025 Nexis. From Spark to Ship.</p></footer>
+
+<script>
+// FAQ toggle
+document.querySelectorAll('.faq-item h4').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const p=q.nextElementSibling;
+    p.style.display=(p.style.display==='block')?'none':'block';
+  });
+});
+
+// Nexis form
+document.getElementById("nexisForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const formData=Object.fromEntries(new FormData(e.target).entries());
+  const response=await fetch("http://localhost:3000/nexis",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(formData)
+  });
+  const data=await response.json();
+  document.getElementById("output").style.display="block";
+  const snapshotDiv=document.getElementById("snapshot");
+  if(data.executive_snapshot){
+    snapshotDiv.innerHTML=`<p><strong>Goal:</strong> ${data.executive_snapshot.goal}</p>
+    <p><strong>Constraints:</strong> ${data.executive_snapshot.constraints}</p>
+    <p><strong>Success Metric:</strong> ${data.executive_snapshot.success_metric}</p>
+    <p><strong>Assumptions:</strong> ${data.executive_snapshot.assumptions}</p>`;
+  }else snapshotDiv.innerText=data.raw||"No snapshot available.";
+  const actionsList=document.getElementById("actions");
+  actionsList.innerHTML="";
+  (data.next_actions||[]).forEach(action=>{
+    const li=document.createElement("li");
+    li.textContent=action;
+    actionsList.appendChild(li);
+  });
+  const questionsList=document.getElementById("questions");
+  questionsList.innerHTML="";
+  (data.open_questions||[]).forEach(q=>{
+    const li=document.createElement("li");
+    li.textContent=q;
+    questionsList.appendChild(li);
+  });
+});
+</script>
+</body>
+</html>
