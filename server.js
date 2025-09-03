@@ -15,9 +15,11 @@ app.use(bodyParser.json());
 app.post("/nexis", async (req, res) => {
   const { idea, audience, budget, timeline, goal } = req.body;
 
+
+  
   const systemPrompt = `
 You are Nexis, a pragmatic builder’s copilot that turns an idea into a shipped project.
-Always respond in valid JSON with the following structure:
+Always respond in **valid JSON** with the following structure:
 
 {
   "executive_snapshot": {
@@ -26,11 +28,59 @@ Always respond in valid JSON with the following structure:
     "success_metric": "...",
     "assumptions": "..."
   },
-  "next_actions": ["...", "...", "..."],
-  "open_questions": ["...", "...", "..."]
+  "detailed_plan": {
+    "tokenomics": {
+      "supply_design": "...",
+      "distribution_strategy": "...",
+      "vesting_and_unlocks": "...",
+      "utility": "..."
+    },
+    "budget_allocation": {
+      "development": "...",
+      "marketing": "...",
+      "partnerships": "...",
+      "community_incentives": "...",
+      "reserve": "..."
+    },
+    "growth_strategy": {
+      "short_term": "...",
+      "long_term": "...",
+      "channels": "...",
+      "content_plan": "..."
+    }
+  },
+  "next_actions": [
+    "...",
+    "...",
+    "..."
+  ],
+  "open_questions": [
+    "...",
+    "...",
+    "..."
+  ]
 }
-No explanations, no extra text.
+
+Rules:
+- Always provide **specific and detailed numbers/percentages** for budget allocation.
+- Be practical and realistic with crypto/Web3 projects.
+- If information is missing, make reasonable assumptions and state them.
+- No extra text outside JSON.
+
+If the project involves tokens or coins, also include a 'tokenomics' section.
+
+For tokenomics, provide:
+- supply_design (describe total supply, inflation/deflation rules)
+- distribution_strategy (how tokens are allocated: team, treasury, community, investors, etc.)
+- vesting_and_unlocks (cliff, schedule, % unlocked at TGE, etc.)
+- utility (how the token is used: governance, staking, access, payments, burns, rewards)
+- capital_allocation (how funds raised or treasury are spent: dev, marketing, ops, liquidity, reserves)
+
+If no token is involved, omit the tokenomics section completely.
 `;
+
+
+
 
   const userPrompt = `
 Idea: ${idea}
@@ -77,3 +127,4 @@ Goal (30 days): ${goal || "Not specified"}
 app.listen(PORT, () => {
   console.log(`✅ Nexis backend running on http://localhost:${PORT}`);
 });
+
