@@ -1,129 +1,459 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexis — From Spark to Ship</title>
-<style>
-body {margin:0;font-family:Arial,sans-serif;background:#111;color:#eee;line-height:1.6;}
-header{text-align:center;padding:60px 20px;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;}
-header h1{font-size:2.5rem;margin-bottom:10px;}
-header p{font-size:1.2rem;margin-bottom:20px;}
-header a{display:inline-block;padding:12px 24px;background:#00e6b8;color:#111;text-decoration:none;border-radius:6px;font-weight:bold;}
-section{max-width:1000px;margin:60px auto;padding:0 20px;}
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
-.card{background:#1c1c1c;padding:20px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
-.card h3{margin-top:0;color:#00e6b8;}
-.faq-item{margin-bottom:20px;}
-.faq-item h4{cursor:pointer;margin:0;padding:10px;background:#222;border-radius:6px;}
-.faq-item p{display:none;padding:10px;background:#333;border-radius:6px;}
-footer{text-align:center;padding:20px;background:#111;font-size:.9rem;color:#777;}
-form{background:#1c1c1c;padding:20px;border-radius:10px;}
-form label{display:block;margin:12px 0 6px;font-weight:bold;}
-form input,form textarea{width:100%;padding:10px;border:none;border-radius:6px;background:#222;color:#eee;}
-form button{margin-top:20px;padding:12px 24px;border:none;border-radius:6px;background:#00e6b8;color:#111;font-weight:bold;cursor:pointer;}
-#snapshot{margin-top:30px;padding:20px;border-radius:10px;background:#222;display:none;}
-#snapshot h3{color:#00e6b8;margin-top:0;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nexis — From Spark to Ship</title>
+  <style>
+
+    /* Flex layout for header */
+.header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* Left column text */
+.hero-text {
+  flex: 1;
+}
+.hero-text h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 12px;
+}
+.hero-text p {
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 600px;
+}
+
+/* Right column logo + title */
+.hero-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.bot-logo-large {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(123, 63, 228, 0.6));
+}
+.brand-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 12px;
+  color: var(--accent);
+}
+
+/* Mobile: stack text + logo */
+@media (max-width: 768px) {
+  .header-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-text p {
+    margin: 0 auto;
+  }
+}
+
+    /* =========================
+       THEME VARIABLES
+       ========================= */
+    :root{
+      --accent: #7B3FE4;         /* purple from the logo */
+      --accent-2: #6A48F3;       /* secondary violet */
+      --bg: #0B0B0D;             /* page background */
+      --bg-header:
+        radial-gradient(circle at 20% -20%, rgba(123,63,228,.25), transparent 70%),
+        linear-gradient(135deg, #0B0B0D, #151A20);
+      --card: #151A20;           /* cards & form background */
+      --muted: #9CA3AF;          /* secondary text */
+      --text: #FFFFFF;           /* primary text */
+      --glow: 0 0 20px rgba(123,63,228,.4);
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", sans-serif;
+    }
+
+    /* Basic reset & base */
+    *{ box-sizing: border-box; }
+    html, body{ margin:0; padding:0; }
+    body{
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header / Hero */
+    header{
+      background: var(--bg-header);
+      padding: 28px 20px 56px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.04);
+    }
+    .wrap{ max-width:1100px; margin:0 auto; padding:0 16px; }
+
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; margin-bottom:28px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none; color: var(--text);
+    }
+    .brand .title{
+      font-size:1.05rem; letter-spacing:.4px; opacity:.9; font-weight:600;
+    }
+    .bot-logo{
+      width:56px; height:56px; object-fit:contain;
+      filter: drop-shadow(0 0 12px rgba(123,63,228,.6));
+    }
+
+    .cta{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:12px 18px; background: var(--accent); color:#0b0f13;
+      border-radius:10px; font-weight:800; text-decoration:none;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.06), var(--glow);
+      transition: transform .15s ease, filter .2s ease;
+    }
+    .cta:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+
+    .hero{ display:grid; gap:14px; margin-top:8px; text-align:left; }
+    .hero h1{ margin:0; font-size: clamp(1.9rem, 3.6vw, 2.6rem); }
+    .hero p{ margin:0; color: var(--muted); max-width:760px; }
+    .hero .cta-row{ margin-top:16px; }
+
+    /* Sections & cards */
+    section{ max-width:1100px; margin:56px auto; padding:0 16px; }
+    .features{
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:18px;
+    }
+    .card{
+      background: var(--card);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px; padding:18px; box-shadow: var(--glow);
+    }
+    .card h3{ margin:0 0 8px; color: var(--accent); }
+
+    /* FAQ */
+    .faq-item{ margin-bottom:16px; }
+    .faq-item h4{
+      margin:0; padding:10px 12px; background:#12181f; border-radius:10px; cursor:pointer;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .faq-item p{
+      display:none; margin:8px 0 0; padding:10px 12px; background:#0f141a; border-radius:10px;
+      border:1px solid rgba(255,255,255,.06); color: var(--muted);
+    }
+
+    /* Form */
+    form{
+      background: var(--card); border:1px solid rgba(255,255,255,.06);
+      padding:18px; border-radius:14px; box-shadow: var(--glow);
+    }
+    form label{ display:block; margin:12px 0 6px; font-weight:700; }
+    form input, form textarea{
+      width:100%; padding:12px; border:1px solid rgba(255,255,255,.09);
+      border-radius:10px; background:#0f141a; color: var(--text);
+    }
+    form button{
+      margin-top:14px; padding:12px 16px; border:none; border-radius:10px;
+      background: var(--accent); color:#0b0f13; font-weight:800; cursor:pointer; box-shadow: var(--glow);
+    }
+    form button:hover{ filter: brightness(1.05); }
+
+    footer{ text-align:center; padding:28px; color: var(--muted); }
+
+    /* Results animations */
+    .fade-in{ opacity:0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+    .fade-in.show{ opacity:1; transform: translateY(0); }
+    .fade-in:nth-child(1){ transition-delay:.05s }
+    .fade-in:nth-child(2){ transition-delay:.10s }
+    .fade-in:nth-child(3){ transition-delay:.15s }
+    .fade-in:nth-child(4){ transition-delay:.20s }
+    .fade-in:nth-child(5){ transition-delay:.25s }
+
+    /* Budget table */
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.06); }
+    th{ text-align:left; color: var(--muted); font-weight:700; }
+    td:last-child, th:last-child{ text-align:right; }
+    .warn{ color:#ffb86b; font-weight:700; }
+    .error{ color:#ff6b6b; font-weight:700; }
+
+    /* Mobile tweaks */
+    @media (max-width: 640px){
+      .topbar{ flex-direction:column; align-items:flex-start; gap:12px; }
+      .cta{ width:100%; justify-content:center; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .fade-in{ transition: none; transform:none; opacity:1; }
+      .cta{ transition:none; }
+    }
+  </style>
 </head>
 <body>
-<header>
-<h1>Build Faster. Ship Smarter.</h1>
-<p>Nexis is your builder’s copilot—from idea to launch. Tokenomics, growth, and content that actually moves the needle.</p>
-<a href="#start">Start with your idea →</a>
+  <header>
+  <div class="wrap header-flex">
+    <div class="hero-text">
+      <h1>Build Faster. Ship Smarter.</h1>
+      <p>
+        Nexis is your builder’s copilot—from idea to launch. Tokenomics, growth,
+        and content that actually moves the needle.
+      </p>
+      <div class="cta-row">
+        <a class="cta" href="#start">Start with your idea →</a>
+      </div>
+    </div>
+
+    <!-- Logo moved to right side -->
+    <div class="hero-logo">
+      <img src="assets/logo1.png" alt="Nexis Bot Logo" class="bot-logo-large" />
+      <h2 class="brand-title">Nexis — Your Copilot</h2>
+    </div>
+  </div>
 </header>
 
-<section>
-<h2>How it Works</h2>
-<div class="features">
-<div class="card"><h3>Scope</h3><p>Clarify your problem, audience, and goals with an executive snapshot and 2-week plan.</p></div>
-<div class="card"><h3>Tokenomics</h3><p>Stress-tested allocations, vesting, and emissions that balance growth and sustainability.</p></div>
-<div class="card"><h3>GTM & Content</h3><p>90-day playbooks, KPI trees, content calendars, and assets that connect with your audience.</p></div>
-</div>
-</section>
 
-<section>
-<h2>Safety First</h2>
-<p>Nexis highlights risks, avoids hype, and refuses manipulative tactics. We provide non-legal educational checklists, helping you stay clear of common traps.</p>
-</section>
 
-<section id="start">
-<h2>Start with Your Idea</h2>
-<form id="nexisForm">
-<label for="idea">Your Idea / Project</label>
-<textarea name="idea" id="idea" rows="3" required></textarea>
-<label for="audience">Audience</label>
-<input type="text" name="audience" id="audience" placeholder="e.g. creators, traders, DAOs">
-<label for="budget">Budget (optional)</label>
-<input type="text" name="budget" id="budget" placeholder="e.g. $10k">
-<label for="timeline">Timeline (optional)</label>
-<input type="text" name="timeline" id="timeline" placeholder="e.g. 3 months">
-<label for="goal">Goal for Next 30 Days</label>
-<input type="text" name="goal" id="goal" placeholder="e.g. launch MVP, recruit community">
-<button type="submit">Run Nexis</button>
-</form>
 
-<div id="output" style="display:none; margin-top:30px;">
-<h3>Executive Snapshot</h3>
-<div id="snapshot" class="card"></div>
-<h3>Next 3 Actions</h3>
-<ul id="actions"></ul>
-<h3>Open Questions</h3>
-<ul id="questions"></ul>
-</div>
-</section>
+  <section>
+    <div class="wrap">
+      <h2>How it Works</h2>
+      <div class="features">
+        <div class="card">
+          <h3>Scope</h3>
+          <p>Clarify your problem, audience, and goals with an executive snapshot and 2-week plan.</p>
+        </div>
+        <div class="card">
+          <h3>Tokenomics</h3>
+          <p>Stress-tested allocations, vesting, and emissions that balance growth and sustainability.</p>
+        </div>
+        <div class="card">
+          <h3>GTM & Content</h3>
+          <p>90-day playbooks, KPI trees, content calendars, and assets that connect with your audience.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<section>
-<h2>FAQ</h2>
-<div class="faq-item"><h4>How does Nexis decide allocations?</h4><p>Based on industry benchmarks, assumptions, and stress tests. All assumptions are transparent.</p></div>
-<div class="faq-item"><h4>Do you offer legal advice?</h4><p>No. Nexis only provides educational guidance and encourages professional counsel.</p></div>
-<div class="faq-item"><h4>Can I export plans?</h4><p>Yes. Plans are exportable as Markdown or CSV for easy sharing.</p></div>
-</section>
+  <section>
+    <div class="wrap">
+      <h2>Safety First</h2>
+      <p class="card">Nexis highlights risks, avoids hype, and refuses manipulative tactics. We provide non-legal educational checklists, helping you stay clear of common traps.</p>
+    </div>
+  </section>
 
-<footer><p>© 2025 Nexis. From Spark to Ship.</p></footer>
+  <section id="start">
+    <div class="wrap">
+      <h2>Start with Your Idea</h2>
+      <form id="nexisForm">
+        <label for="idea">Your Idea / Project</label>
+        <textarea name="idea" id="idea" rows="3" required></textarea>
 
-<script>
-// FAQ toggle
-document.querySelectorAll('.faq-item h4').forEach(q=>{
-  q.addEventListener('click',()=>{
-    const p=q.nextElementSibling;
-    p.style.display=(p.style.display==='block')?'none':'block';
-  });
-});
+        <label for="audience">Audience</label>
+        <input type="text" name="audience" id="audience" placeholder="e.g. creators, traders, DAOs"/>
 
-// Nexis form
-document.getElementById("nexisForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const formData=Object.fromEntries(new FormData(e.target).entries());
-  const response=await fetch("http://localhost:3000/nexis",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(formData)
-  });
-  const data=await response.json();
-  document.getElementById("output").style.display="block";
-  const snapshotDiv=document.getElementById("snapshot");
-  if(data.executive_snapshot){
-    snapshotDiv.innerHTML=`<p><strong>Goal:</strong> ${data.executive_snapshot.goal}</p>
-    <p><strong>Constraints:</strong> ${data.executive_snapshot.constraints}</p>
-    <p><strong>Success Metric:</strong> ${data.executive_snapshot.success_metric}</p>
-    <p><strong>Assumptions:</strong> ${data.executive_snapshot.assumptions}</p>`;
-  }else snapshotDiv.innerText=data.raw||"No snapshot available.";
-  const actionsList=document.getElementById("actions");
-  actionsList.innerHTML="";
-  (data.next_actions||[]).forEach(action=>{
-    const li=document.createElement("li");
-    li.textContent=action;
-    actionsList.appendChild(li);
-  });
-  const questionsList=document.getElementById("questions");
-  questionsList.innerHTML="";
-  (data.open_questions||[]).forEach(q=>{
-    const li=document.createElement("li");
-    li.textContent=q;
-    questionsList.appendChild(li);
-  });
-});
-</script>
+        <label for="budget">Budget (optional)</label>
+        <input type="text" name="budget" id="budget" placeholder="e.g. $10k"/>
+
+        <label for="timeline">Timeline (optional)</label>
+        <input type="text" name="timeline" id="timeline" placeholder="e.g. 3 months"/>
+
+        <label for="goal">Goal for Next 30 Days</label>
+        <input type="text" name="goal" id="goal" placeholder="e.g. launch MVP, recruit community"/>
+
+        <button type="submit">Run Nexis</button>
+      </form>
+
+      <div id="output" style="display:none; margin-top:22px;">
+        <h3 class="fade-in">Executive Snapshot</h3>
+        <div id="snapshot" class="card fade-in"></div>
+
+        <h3 class="fade-in">Detailed Plan</h3>
+        <div class="card fade-in" id="detailed-plan">
+          <h4>Tokenomics</h4>
+          <ul id="tokenomics" style="margin-top:6px;"></ul>
+
+          <h4 style="margin-top:14px;">Budget Allocation</h4>
+          <table id="budget" style="margin-top:6px;">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>% Allocation</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <th>Total</th>
+                <th id="budget-total">0%</th>
+              </tr>
+            </tfoot>
+          </table>
+          <div id="budget-note" style="margin-top:8px;"></div>
+
+          <h4 style="margin-top:14px;">Growth Strategy</h4>
+          <ul id="growth" style="margin-top:6px;"></ul>
+        </div>
+
+        <h3 class="fade-in">Next 3 Actions</h3>
+        <ul id="actions" class="card fade-in" style="padding:12px;"></ul>
+
+        <h3 class="fade-in">Open Questions</h3>
+        <ul id="questions" class="card fade-in" style="padding:12px;"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>FAQ</h2>
+      <div class="faq-item">
+        <h4>How does Nexis decide allocations?</h4>
+        <p>Based on industry benchmarks, assumptions, and stress tests. All assumptions are transparent.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Do you offer legal advice?</h4>
+        <p>No. Nexis only provides educational guidance and encourages professional counsel.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Can I export plans?</h4>
+        <p>Yes. Plans are exportable as Markdown or CSV for easy sharing.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p>© 2025 Nexis. From Spark to Ship.</p>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ toggle
+    document.querySelectorAll('.faq-item h4').forEach(q => {
+      q.addEventListener('click', () => {
+        const p = q.nextElementSibling;
+        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+      });
+    });
+
+    // Helper: parse "25%" or 25
+    function parsePercent(v){
+      if (typeof v !== "string") return Number(v)||0;
+      return Number(v.replace('%','').trim()) || 0;
+    }
+
+    // Nexis form handler
+    document.getElementById("nexisForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = Object.fromEntries(new FormData(e.target).entries());
+
+      const response = await fetch("http://localhost:3000/nexis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      const out = document.getElementById("output");
+      out.style.display = "block";
+
+      // Snapshot
+      const snapshotDiv = document.getElementById("snapshot");
+      if (data.executive_snapshot) {
+        snapshotDiv.innerHTML = `
+          <p><strong>Goal:</strong> ${data.executive_snapshot.goal}</p>
+          <p><strong>Constraints:</strong> ${data.executive_snapshot.constraints}</p>
+          <p><strong>Success Metric:</strong> ${data.executive_snapshot.success_metric}</p>
+          <p><strong>Assumptions:</strong> ${data.executive_snapshot.assumptions}</p>
+        `;
+      } else {
+        snapshotDiv.innerText = data.raw || "No snapshot available.";
+      }
+
+      // Detailed Plan
+      const tokenomicsList = document.getElementById("tokenomics");
+      const budgetBody = document.querySelector("#budget tbody");
+      const budgetTotalCell = document.getElementById("budget-total");
+      const budgetNote = document.getElementById("budget-note");
+      const growthList = document.getElementById("growth");
+
+      tokenomicsList.innerHTML = "";
+      budgetBody.innerHTML = "";
+      growthList.innerHTML = "";
+      budgetTotalCell.textContent = "0%";
+      budgetNote.textContent = "";
+
+      if (data.detailed_plan) {
+        // Tokenomics
+        const tok = data.detailed_plan.tokenomics || {};
+        for (const [k,v] of Object.entries(tok)) {
+          if (!v) continue;
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${k.replaceAll('_',' ')}:</strong> ${v}`;
+          tokenomicsList.appendChild(li);
+        }
+
+        // Budget (as table + total check)
+        const bud = data.detailed_plan.budget_allocation || {};
+        let total = 0;
+        for (const [k,v] of Object.entries(bud)) {
+          const pct = parsePercent(v);
+          total += pct;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${k.replaceAll('_',' ')}</td><td>${pct}%</td>`;
+          budgetBody.appendChild(tr);
+        }
+        const totalRounded = Math.round(total * 10) / 10;
+        budgetTotalCell.textContent = totalRounded + "%";
+        if (totalRounded === 100) {
+          budgetNote.innerHTML = "✔ Budget totals 100%.";
+        } else if (totalRounded > 100) {
+          budgetNote.innerHTML = "<span class='error'>❗ Budget exceeds 100% — adjust allocations.</span>";
+        } else {
+          budgetNote.innerHTML = "<span class='warn'>⚠ Budget is under 100% — consider allocating the remainder.</span>";
+        }
+
+        // Growth Strategy
+        const gr = data.detailed_plan.growth_strategy || {};
+        for (const [k,v] of Object.entries(gr)) {
+          if (!v) continue;
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${k.replaceAll('_',' ')}:</strong> ${v}`;
+          growthList.appendChild(li);
+        }
+      }
+
+      // Actions
+      const actionsList = document.getElementById("actions");
+      actionsList.innerHTML = "";
+      (data.next_actions || []).forEach(action => {
+        const li = document.createElement("li");
+        li.textContent = action;
+        actionsList.appendChild(li);
+      });
+
+      // Questions
+      const questionsList = document.getElementById("questions");
+      questionsList.innerHTML = "";
+      (data.open_questions || []).forEach(q => {
+        const li = document.createElement("li");
+        li.textContent = q;
+        questionsList.appendChild(li);
+      });
+
+      // Animate reveals
+      document.querySelectorAll("#output .fade-in").forEach((el, i) => {
+        setTimeout(() => el.classList.add("show"), i * 160);
+      });
+    });
+  </script>
 </body>
 </html>
