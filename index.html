@@ -354,7 +354,7 @@
 
       const formData = Object.fromEntries(new FormData(e.target).entries());
 
-      const response = await fetch("http://localhost:3000/nexis", {
+      const response = await fetch("https://nexisprotocol.onrender.com/nexis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -457,3 +457,4 @@
   </script>
 </body>
 </html>
+
