@@ -6,8 +6,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -15,11 +16,13 @@ app.use(bodyParser.json());
 app.post("/nexis", async (req, res) => {
   const { idea, audience, budget, timeline, goal } = req.body;
 
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(500).json({ error: "Missing GROQ_API_KEY on server." });
+  }
 
-  
   const systemPrompt = `
 You are Nexis, a pragmatic builder’s copilot that turns an idea into a shipped project.
-Always respond in **valid JSON** with the following structure:
+Return ONLY valid JSON (no backticks, no prose) with:
 
 {
   "executive_snapshot": {
@@ -36,11 +39,11 @@ Always respond in **valid JSON** with the following structure:
       "utility": "..."
     },
     "budget_allocation": {
-      "development": "...",
-      "marketing": "...",
-      "partnerships": "...",
-      "community_incentives": "...",
-      "reserve": "..."
+      "development": "…%",
+      "marketing": "…%",
+      "partnerships": "…%",
+      "community_incentives": "…%",
+      "reserve": "…%"
     },
     "growth_strategy": {
       "short_term": "...",
@@ -49,38 +52,15 @@ Always respond in **valid JSON** with the following structure:
       "content_plan": "..."
     }
   },
-  "next_actions": [
-    "...",
-    "...",
-    "..."
-  ],
-  "open_questions": [
-    "...",
-    "...",
-    "..."
-  ]
+  "next_actions": ["...","...","..."],
+  "open_questions": ["...","...","..."]
 }
-
 Rules:
-- Always provide **specific and detailed numbers/percentages** for budget allocation.
-- Be practical and realistic with crypto/Web3 projects.
-- If information is missing, make reasonable assumptions and state them.
-- No extra text outside JSON.
-
-If the project involves tokens or coins, also include a 'tokenomics' section.
-
-For tokenomics, provide:
-- supply_design (describe total supply, inflation/deflation rules)
-- distribution_strategy (how tokens are allocated: team, treasury, community, investors, etc.)
-- vesting_and_unlocks (cliff, schedule, % unlocked at TGE, etc.)
-- utility (how the token is used: governance, staking, access, payments, burns, rewards)
-- capital_allocation (how funds raised or treasury are spent: dev, marketing, ops, liquidity, reserves)
-
-If no token is involved, omit the tokenomics section completely.
+- Use percentages for budget_allocation (numbers + %).
+- Be practical and specific. If info is missing, make reasonable assumptions and state them.
+- If the project is not token-based, OMIT the "tokenomics" object entirely.
+- Output MUST be valid JSON with double quotes only. No markdown fences, no commentary.
 `;
-
-
-
 
   const userPrompt = `
 Idea: ${idea}
@@ -107,24 +87,44 @@ Goal (30 days): ${goal || "Not specified"}
       }),
     });
 
-    const data = await response.json();
-    const rawOutput = data.choices?.[0]?.message?.content || "{}";
+    const apiJSON = await response.json();
 
-    let parsedOutput;
-    try {
-      parsedOutput = JSON.parse(rawOutput);
-    } catch {
-      parsedOutput = { raw: rawOutput };
+    if (!response.ok) {
+      console.error("Groq API error:", apiJSON);
+      return res.status(502).json({ error: "Groq API error", details: apiJSON });
     }
 
-    res.json(parsedOutput);
+    // Model text content
+    let raw = (apiJSON.choices?.[0]?.message?.content || "").trim();
+    console.log("Groq raw content:", raw);
+
+    // Strip ``` fences if present
+    if (raw.startsWith("```")) {
+      raw = raw.replace(/^```json\s*/i, "");
+      raw = raw.replace(/^```\s*/i, "");
+      raw = raw.replace(/```$/i, "");
+    }
+
+    // Try to parse JSON
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Return raw so frontend shows *something* instead of "{}"
+      return res.json({ raw });
+    }
+
+    // Optional: if tokenomics exists but every field says "Not applicable", drop it
+    const tok = parsed?.detailed_plan?.tokenomics;
+    if (tok && Object.values(tok).every(v => typeof v === "string" && /not applicable/i.test(v))) {
+      delete parsed.detailed_plan.tokenomics;
+    }
+
+    return res.json(parsed);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to generate Nexis output." });
+    console.error("Server error:", err);
+    return res.status(500).json({ error: "Failed to generate Nexis output." });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Nexis backend running on http://localhost:${PORT}`);
-});
-
+app.listen(PORT,
