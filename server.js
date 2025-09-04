@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GROQ_KEY = (process.env.GROQ_API_KEY || "").trim();
-const GROQ_MODEL = (process.env.GROQ_MODEL || "llama-3.1-70b-versatile").trim();
+const GROQ_MODEL = (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -143,3 +143,4 @@ Goal (30 days): ${goal || "Not specified"}
 app.listen(PORT, () => {
   console.log(`✅ Nexis backend running on port ${PORT}`);
 });
+
