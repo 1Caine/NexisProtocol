@@ -9,6 +9,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const GROQ_KEY = (process.env.GROQ_API_KEY || "").trim();
+const GROQ_MODEL = (process.env.GROQ_MODEL || "llama-3.1-70b-versatile").trim();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -21,7 +23,7 @@ app.get("/", (req, res) => {
 app.post("/nexis", async (req, res) => {
   const { idea, audience, budget, timeline, goal } = req.body;
 
-  if (!process.env.GROQ_API_KEY) {
+  if (!GROQ_KEY) {
     return res.status(500).json({ error: "Missing GROQ_API_KEY on server." });
   }
 
@@ -79,11 +81,11 @@ Goal (30 days): ${goal || "Not specified"}
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${GROQ_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama3-70b-8192",
+        model: GROQ_MODEL, // 👈 updated model (configurable)
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -95,8 +97,14 @@ Goal (30 days): ${goal || "Not specified"}
     const apiJSON = await response.json();
 
     if (!response.ok) {
-      console.error("Groq API error:", apiJSON);
-      return res.status(502).json({ error: "Groq API error", details: apiJSON });
+      const status = response.status;
+      console.error("Groq API error:", status, apiJSON);
+      return res.status(status).json({
+        error: "Groq API error",
+        status,
+        message: apiJSON?.error?.message || apiJSON?.message || "Unknown error",
+        details: apiJSON
+      });
     }
 
     // Model text content
@@ -105,9 +113,9 @@ Goal (30 days): ${goal || "Not specified"}
 
     // Strip ``` fences if present
     if (raw.startsWith("```")) {
-      raw = raw.replace(/^```json\s*/i, "");
-      raw = raw.replace(/^```\s*/i, "");
-      raw = raw.replace(/```$/i, "");
+      raw = raw.replace(/^```json\s*/i, "")
+               .replace(/^```\s*/i, "")
+               .replace(/```$/i, "");
     }
 
     // Try to parse JSON
@@ -115,7 +123,7 @@ Goal (30 days): ${goal || "Not specified"}
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // Return raw so frontend shows *something* instead of "{}"
+      // Return raw so frontend shows something instead of "{}"
       return res.json({ raw });
     }
 
