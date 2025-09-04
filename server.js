@@ -13,6 +13,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Simple health check
+app.get("/", (req, res) => {
+  res.type("text/plain").send("Nexis backend is running.");
+});
+
 app.post("/nexis", async (req, res) => {
   const { idea, audience, budget, timeline, goal } = req.body;
 
@@ -127,4 +132,6 @@ Goal (30 days): ${goal || "Not specified"}
   }
 });
 
-app.listen(PORT,
+app.listen(PORT, () => {
+  console.log(`✅ Nexis backend running on port ${PORT}`);
+});
