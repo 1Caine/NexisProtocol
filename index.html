@@ -41,6 +41,27 @@
   object-fit: contain;
   filter: drop-shadow(0 0 16px rgba(123, 63, 228, 0.6));
 }
+
+.hero-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  /* push to the right + up */
+  margin-left: auto;   /* pushes logo block to far right */
+  margin-top: -20px;   /* moves it upward, adjust as needed */
+  position: relative;
+  right: -20px;        /* nudge further right inside header */
+}
+
+.bot-logo-large {
+  width: 160px;        /* bigger size */
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(123, 63, 228, 0.6));
+}
+
 .brand-title {
   font-size: 1.4rem;
   font-weight: 700;
@@ -270,7 +291,7 @@
       <div class="cta-row">
         <a class="cta" href="#start">Start with your idea →</a>
         <div class="ca-box">
-          <span id="ca-text">$Under Management</span>
+          <span id="ca-text">$UnderManagement</span>
           <button type="button" onclick="copyCA()">Copy</button>
         </div>
       </div>
@@ -287,14 +308,13 @@
 
 
 
-
   <section>
     <div class="wrap">
       <h2>How it Works</h2>
       <div class="features">
         <div class="card">
           <h3>Scope</h3>
-          <p>Clarify your problem, audience, and goals with an executive snapshot and 30-day plan.</p>
+          <p>Clarify your problem, audience, and goals with an executive snapshot and 2-week plan.</p>
         </div>
         <div class="card">
           <h3>Tokenomics</h3>
