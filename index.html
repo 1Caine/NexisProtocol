@@ -193,6 +193,55 @@
       .fade-in{ transition: none; transform:none; opacity:1; }
       .cta{ transition:none; }
     }
+    .cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;       /* space between items */
+  margin-top: 16px;
+}
+
+/* CA box: shrink to content */
+.ca-box {
+  display: inline-flex;
+  align-items: center;
+  background: #12181f;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #00e6b8;
+  white-space: nowrap;     /* keep address in one line */
+  box-shadow: 0 0 8px rgba(123,63,228,0.3);
+}
+
+/* Copy button inside CA box */
+.ca-box button {
+  background: var(--accent);
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0b0f13;
+  font-weight: bold;
+}
+.ca-box button:hover {
+  filter: brightness(1.1);
+}
+
+/* Mobile: stack button + CA box */
+@media (max-width: 640px) {
+  .cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cta-row .cta,
+  .cta-row .ca-box {
+    width: 100%;
+    justify-content: center;
+  }
   </style>
 </head>
 <body>
@@ -204,11 +253,13 @@
         Nexis is your builder’s copilot—from idea to launch. Tokenomics, growth,
         and content that actually moves the needle.
       </p>
-      <div class="cta-row">
-        <a class="cta" href="#start">Start with your idea →</a>
-      </div>
-    </div>
-
+       <div class="cta-row">
+  <a class="cta" href="#start">Start with your idea →</a>
+  <div class="ca-box">
+    <span id="ca-text">$Coming soon</span>
+    <button onclick="copyCA()">Copy</button>
+  </div>
+</div>
     <!-- Logo moved to right side -->
     <div class="hero-logo">
       <img src="assets/logo1.png" alt="Nexis Bot Logo" class="bot-logo-large" />
@@ -454,8 +505,14 @@
         setTimeout(() => el.classList.add("show"), i * 160);
       });
     });
+     function copyCA() {
+  const text = document.getElementById("ca-text").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Contract Address copied!");
+  });
   </script>
 </body>
 </html>
+
 
 
