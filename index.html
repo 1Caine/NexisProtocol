@@ -193,7 +193,17 @@
       .fade-in{ transition: none; transform:none; opacity:1; }
       .cta{ transition:none; }
     }
-    .cta-row {
+
+    .heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* CTA row: align button + CA box neatly */
+.cta-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -242,31 +252,38 @@
     width: 100%;
     justify-content: center;
   }
+}
+
   </style>
+
 </head>
 <body>
   <header>
-  <div class="wrap header-flex">
+  <div class="wrap hero">
+    <!-- Left: Text and CTA -->
     <div class="hero-text">
       <h1>Build Faster. Ship Smarter.</h1>
       <p>
         Nexis is your builder’s copilot—from idea to launch. Tokenomics, growth,
         and content that actually moves the needle.
       </p>
-       <div class="cta-row">
-  <a class="cta" href="#start">Start with your idea →</a>
-  <div class="ca-box">
-    <span id="ca-text">$Coming soon</span>
-    <button onclick="copyCA()">Copy</button>
-  </div>
-</div>
-    <!-- Logo moved to right side -->
+      <div class="cta-row">
+        <a class="cta" href="#start">Start with your idea →</a>
+        <div class="ca-box">
+          <span id="ca-text">$Under Management</span>
+          <button type="button" onclick="copyCA()">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Logo and brand title -->
     <div class="hero-logo">
       <img src="assets/logo1.png" alt="Nexis Bot Logo" class="bot-logo-large" />
       <h2 class="brand-title">Nexis — Your Copilot</h2>
     </div>
   </div>
 </header>
+
 
 
 
@@ -405,7 +422,7 @@
 
       const formData = Object.fromEntries(new FormData(e.target).entries());
 
-      const response = await fetch("https://nexisprotocol.onrender.com/nexis", {
+      const response = await fetch("http://localhost:3000/nexis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -505,14 +522,40 @@
         setTimeout(() => el.classList.add("show"), i * 160);
       });
     });
-     function copyCA() {
-  const text = document.getElementById("ca-text").innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Contract Address copied!");
-  });
-  </script>
+
+     window.copyCA = async function () {
+    const el = document.getElementById("ca-text");
+    const text = (el?.textContent || el?.innerText || "").trim();
+    if (!text) return;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for http/file/older browsers
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+
+      // Subtle feedback instead of alert
+      const btn = document.querySelector(".ca-box button");
+      const old = btn.textContent;
+      btn.textContent = "Copied!";
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1200);
+    } catch (e) {
+      console.error(e);
+      alert("Copy failed. You can select and copy manually.");
+    }
+  };
+
+
+</script>
 </body>
 </html>
-
-
-
